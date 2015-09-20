@@ -3,7 +3,7 @@
 
 typedef long long llong;
 
-llong generic_euclid(llong, llong, llong&, llong&, llong&);
+llong generalized_euclid(llong, llong, llong&, llong&, llong&);
 llong pow_module(llong, llong, llong);
 
 #endif
