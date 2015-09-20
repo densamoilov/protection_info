@@ -3,6 +3,7 @@
 
 typedef long long llong;
 
-llong generic_euclid(llong a, llong b, llong &gcd, llong &x, llong &y);
+llong generic_euclid(llong, llong, llong&, llong&, llong&);
 llong pow_module(llong, llong, llong);
+
 #endif

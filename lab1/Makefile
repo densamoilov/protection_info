@@ -8,12 +8,12 @@ prog_obj := test.o
 
 CC := g++
 CFLAGS := -O3 -Wall -g -std=c++14 -fopenmp
-LDFLAGS := -fopenmp -L ./$(libname)
+LDFLAGS := -fopenmp -L. cryptolib.so
 
-all: $(progname) $(libname)
+all: $(progname)
 	
 
-$(progname): $(prog_obj)
+$(progname): $(prog_obj) $(libname)
 	$(CC) -o $(progname) $(prog_obj) $(LDFLAGS)
 
 $(libname): $(lib_obj)
