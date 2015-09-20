@@ -26,4 +26,4 @@ $(lib_obj): $(lib_src)
 	$(CC) $(CFLAGS) -fPIC -c $(lib_src) -o $@
 
 clean:
-	@rm -rf *.o $(progname)
+	rm -f *.o *.so $(progname) 
