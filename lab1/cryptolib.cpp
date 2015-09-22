@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <map>
+#include <cmath>
 
 typedef long long llong;
 
@@ -43,5 +45,48 @@ llong generalized_euclid(llong a, llong b, llong &gcd, llong &x, llong &y)
     x = u[1];
     y = u[2];
 
+    return 0;
+}
+
+llong diffie_hellman(llong d, llong m, llong &g, llong &Zab, llong &Zba)
+{
+    g = 2;
+
+    while (pow_module(g, d, m) == 1) {
+        ++g;
+    }
+    // Closed key
+    llong Xa = 7;// rand() % (m - 1) + 2;
+    llong Xb = 8;//rand() % (m - 1) + 2;
+    // Opened key
+    llong Ya = pow_module(g, Xa, m);
+    llong Yb = pow_module(g, Xb, m);
+
+    Zab = pow_module(Yb, Xa, m);
+    Zba = pow_module(Ya, Xb, m);
+
+    return 0;
+}
+
+llong baby_step_giant_step(llong a, llong m, llong y, llong &x)
+{
+    llong k1, k2;
+    std::map<llong, llong>::iterator it;
+
+    k1 = k2 = sqrt(m) + 1;
+
+    std::map<llong, llong> tmp;
+
+    for (int i = 1; i <= k1; ++i) {
+        tmp.insert(std::pair<llong, llong>(pow_module(a, i*k1, m), i));
+    }
+
+    for (int j = 0; j < k2; ++j) {
+       llong tmploc = pow_module(y, 1, m) * pow_module(a, j, m) % m;
+       if ((it = tmp.find(tmploc)) != tmp.end()) {
+           x = a * it->second - j;
+           break;
+       }
+    }
     return 0;
 }
