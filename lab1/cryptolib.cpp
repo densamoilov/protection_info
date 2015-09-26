@@ -1,19 +1,19 @@
 #include <cstdio>
 #include <map>
 #include <cmath>
+#include <iostream>
 
 typedef long long llong;
 
 llong pow_module(llong a, llong d, llong m)
 {
     llong res = 1;
-    llong tmp = a;
     // Order of traversal bits from right to left
     for (size_t i = 0; i < sizeof(llong) * 8; ++i) {
         if ((d >> i) & 0x1) {
-            res = res * tmp % m;
+            res = res * a % m;
         }
-        tmp = tmp * tmp % m;
+        a = a * a % m;
     }
     return res;
 }
@@ -48,16 +48,41 @@ llong generalized_euclid(llong a, llong b, llong &gcd, llong &x, llong &y)
     return 0;
 }
 
-llong diffie_hellman(llong d, llong m, llong &g, llong &Zab, llong &Zba)
+llong diffie_hellman(llong d, llong &Zab, llong &Zba)
 {
-    g = 2;
-
+    llong m{0};
+    srand(time(0));
+    bool isprime = false;
+    // Generation a prime number
+    while (!isprime) {
+        isprime = true;
+        m = rand() % 30000;
+        // Check for prime
+        for (size_t i = 2; i <= static_cast<size_t>(sqrt(m)); ++i) {
+            if (m % i == 0) {
+                 isprime = false;
+                 break;
+            }
+        }
+        // if m is prime, check d
+        if (isprime) {
+            d = (m - 1) / 2;
+            for (size_t i = 2; i <= static_cast<size_t>(sqrt(d)); ++i) {
+                if (d % i == 0) {
+                    isprime = false;
+                    break;
+                }
+            }
+        }
+    }
+    llong g = 2;
     while (pow_module(g, d, m) == 1) {
         ++g;
     }
+
     // Closed key
-    llong Xa = 7;// rand() % (m - 1) + 2;
-    llong Xb = 8;//rand() % (m - 1) + 2;
+    llong Xa = rand() % (m - 1) + 2;
+    llong Xb = rand() % (m - 1) + 2;
     // Opened key
     llong Ya = pow_module(g, Xa, m);
     llong Yb = pow_module(g, Xb, m);

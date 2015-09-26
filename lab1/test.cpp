@@ -5,19 +5,13 @@
 
 int main()
 {
-    llong a = 2;
-    llong d = 1000000006;
-    llong m = 1000000007;
+    llong Zab, Zba;
 
-    llong res = pow_module(a, d, m);
-    std::cout << "res = " << res << std::endl;
-
-    llong a2 = 3;
-    llong b = 19;
-    llong x;
-    llong y;
-    llong gcd;
-    generalized_euclid(a2, b, gcd, x, y);
-    std::cout << "gcd = " << gcd << " x = " << x << " y = " << y << std::endl;
+    diffie_hellman(1, Zab, Zba);
+    
+    std::cout << "Zab = " << Zab << std::endl;
+    std::cout << "Zba = " << Zba << std::endl;
     return 0;
+
+
 }
