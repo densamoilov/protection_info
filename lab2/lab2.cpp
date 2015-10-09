@@ -1,5 +1,6 @@
 #include <random>
 #include <iostream>
+#include <vector>
 
 #include "../lab1/cryptolib.h"
 
@@ -32,7 +33,8 @@ int main()
 
     llong Ca = random(gen);
     llong Da = random(gen);
-
+TODO: Euclid and check using Ca*Da % (p - 1) == 1
+Ca and Da must be relatievely prime
     for (size_t i = 0; (Ca * Da) % (p - 1) != 1; ++i) {
         if (i % 2 == 0) {
             ++Ca;
@@ -66,14 +68,14 @@ int main()
     std::cout << "m = " << m << std::endl;
 --------------------------------------------------------*/
 
-/*--------------------------- El gamal -------------------*/
+/*--------------------------- El gamal -------------------*
     llong p{0}, d{0}, m{1234};
     srand(time(0));
     bool isprime = false;
     // Generation a prime number
     while (!isprime) {
         isprime = true;
-        p = rand() % 30000;
+        p = rand() % 30000 + 5000;
         // Check for prime
         for (size_t i = 2; i <= static_cast<size_t>(sqrt(p)); ++i) {
             if (p % i == 0) {
@@ -96,27 +98,75 @@ int main()
     while (pow_module(g, d, p) == 1) {
         ++g;
     }
-    std::default_random_engine genn;
-    std::uniform_int_distribution<llong> randomm(2, p - 2);
-    // Secret number
-    llong Ca = randomm(genn);
-    llong Cb = randomm(genn);
 
-    llong Da = pow_module(g, Ca, p);
+    std::default_random_engine gen_cl_key;
+    std::uniform_int_distribution<llong> random_cl_key(2, p-2);
+    // Closed keys
+    llong Cb = random_cl_key(gen_cl_key);
+    // Opened keys
     llong Db = pow_module(g, Cb, p);
 
-    std::default_random_engine trans;
-    std::uniform_int_distribution<llong> randtr(1, p - 2);
+    std::default_random_engine gen_tr;
+    std::uniform_int_distribution<llong> rand_tr(1, p - 2);
 
-    llong k = randtr(trans);
+    llong k = rand_tr(gen_tr);
 
+    // Send message to B from A
     llong r = pow_module(g, k, p);
-    llong e = m * pow_module(Db, k, p);
+    llong e = m * pow_module(Db, k, p) % p;
 
-    llong mrecd = e * pow_module(r, p - 1 - Cb, p);
+    llong mrecd = e * pow_module(r, p - 1 - Cb, p) % p;
 
     std::cout << "Sent message: " << m << std::endl;
     std::cout << "Received message: " << mrecd << std::endl;
+-----------------------------------------------------------------*/
+
+/*--------------------------Vernama ---------------------------
+
+    llong size = 100;
+
+    std::default_random_engine gen;
+    std::uniform_int_distribution<llong> random(0, 255);
+
+    std::vector<llong> keys;
+    std::vector<llong> e;
+    std::vector<llong> m;
+    std::vector<llong> m_;
+
+    keys.reserve(size);
+    e.reserve(size);
+    m.reserve(size);
+    m_.reserve(size);
+
+    // Gen m
+    for (size_t i = 0 ; i < size; ++i) {
+        m.push_back(i);
+    }
+
+    // Create keys
+    for (size_t i = 0; i < size; ++i) {
+        keys.push_back(random(gen));
+    }
+    // Encode
+    for (size_t i = 0; i < size; ++i) {
+        e[i] = m[i] ^ keys[i];
+    }
+    // Decode
+    for (size_t i = 0; i < size; ++i) {
+        m_.push_back(e[i] ^ keys[i]);
+    }
+    // Validate
+    if (m_ == m) {
+        std::cout << "Allright" << std::endl;
+    } else {
+        std::cout << "Error" << std::endl;
+    }
+------------------------------------------------------------*/
+
+/*-------------------------- RSA ---------------------------*/
+
+
+
 
     return 0;
 }
