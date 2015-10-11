@@ -28,7 +28,6 @@ llong get_prime_number(llong lower_bound, llong upper_bound)
             }
         }
     }
-    std::cout << p << std::endl;
     return p;
 }
 
@@ -234,13 +233,65 @@ void vernama()
 
 //TODO: Impement RSA
 void RSA()
-{}
+{
+    llong p = get_prime_number(1, 30'000);
+    llong q = get_prime_number(1, 30'000);
+
+    llong n = p * q;
+    llong fi = (p - 1) * (q - 1);
+
+    // Get c and d
+    llong d{0};
+    llong gcd{0}, x{0}, y{0}, c{0};
+
+    while (true) {
+        d = get_prime_number(1, fi -1);
+        generalized_euclid(d, fi, gcd, x, y);
+        if (gcd == 1) {
+            break;
+        }
+    }
+    generalized_euclid(d, fi, gcd, x, y);
+
+    if (x < 0) {
+        c = fi + x;
+    } else {
+        c = x;
+    }
+    // Open file w/ message
+    std::ifstream msg("t", std::ios::binary | std::ios::in);
+    if (!msg.is_open()) {
+        std::cerr << "File not found" << std::endl;
+    }
+
+    llong m{0}, e{0};
+
+    // Encode
+    std::ofstream encode_out("rsa_encode", std::ios::binary | std::ios::out);
+    while (msg.read((char*)&m, sizeof(char))) {
+        e = pow_module(m, d, n);
+        encode_out.write((char*)&e, sizeof(llong));
+    }
+    msg.close();
+    encode_out.close();
+
+    // Decode
+    std::ifstream encode_in("rsa_encode", std::ios::binary | std::ios::in);
+    std::ofstream decode_out("rsa_decode", std::ios::binary | std::ios::out);
+    while (encode_in.read((char*)&e, sizeof(llong))) {
+        m = pow_module(e, c, n);
+        decode_out.write((char*)&m, sizeof(char));
+    }
+    encode_in.close();
+    decode_out.close();
+}
 
 int main()
 {
     //shamir();
     //el_gamal();
-    vernama();
+    //vernama();
+    RSA();
 
     return 0;
 }
