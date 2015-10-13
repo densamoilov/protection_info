@@ -94,7 +94,7 @@ void shamir()
 
 void el_gamal()
 {
-    std::ifstream msg("t", std::ios::binary);
+    std::ifstream msg("example", std::ios::binary);
 
     if (!msg) {
         std::cerr << "File not found" << std::endl;
@@ -176,7 +176,7 @@ void el_gamal()
 void vernama()
 {
 
-    std::ifstream msg("t", std::ios::binary | std::ios::in);
+    std::ifstream msg("example", std::ios::binary | std::ios::in);
     if (!msg.is_open()) {
         std::cerr << "File not found" << std::endl;
     }
@@ -259,7 +259,7 @@ void RSA()
         c = x;
     }
     // Open file w/ message
-    std::ifstream msg("t", std::ios::binary | std::ios::in);
+    std::ifstream msg("example", std::ios::binary | std::ios::in);
     if (!msg.is_open()) {
         std::cerr << "File not found" << std::endl;
     }
@@ -289,8 +289,8 @@ void RSA()
 int main()
 {
     //shamir();
-    //el_gamal();
-    //vernama();
+    el_gamal();
+    vernama();
     RSA();
 
     return 0;
