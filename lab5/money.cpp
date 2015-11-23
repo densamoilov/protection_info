@@ -121,11 +121,43 @@ public:
         return N;
     }
 
-    llong authentication_request(llong hh, llong num_banknote)
+    llong authentication_request_client(llong hh, llong num_banknote)
     {
         return pow_module(hh, c_[num_banknote], N);
     }
+
+    bool authentication_request_company(llong n, llong s)
+    {
+         
+        hash<llong> hash_cpp;
+
+        llong h = hash_cpp(n);
+        h %= N;
+        
+        bool is_equal{false};
+        
+        for (int i = 0; i < 9; ++i) {
+            llong tmp = pow_module(s, d[i], N);
+            if (h == tmp) {
+                is_equal = true;
+                break;
+            } else {
+                is_equal = false;
+            }
+        }
+
+        return (is_equal) ? true : false;
+    }
 };
+
+class Company {
+public:
+    bool verify_info(llong n, llong s, Bank& bank)
+    {
+        return (bank.authentication_request_company(n, s)) ? true : false;
+    }
+};
+
 
 class Client {
 private:
@@ -142,7 +174,7 @@ public:
         N_ = bank.get_n();
     }
 
-    void perform_transaction(Bank& bank, llong num_banknote)
+    void perform_transaction(Bank& bank, llong num_banknote, Company& company)
     {
         default_random_engine gen(time(0));
         uniform_int_distribution<llong> random(1, N_ - 1);
@@ -161,7 +193,7 @@ public:
         }
 
         llong hh = (h * (pow_module(r, d_[num_banknote], N_))) % N_;
-        llong ss = bank.authentication_request(hh, num_banknote);
+        llong ss = bank.authentication_request_client(hh, num_banknote);
 
         generalized_euclid(r, N_, gcd, x, y);
         if (x < 0) {
@@ -172,17 +204,18 @@ public:
 
         llong s = (ss * r) % N_;
         // to do verify in shop
-
-
-
+        if (company.verify_info(n, s, bank)) {
+            cout << "Transaction is passed" << endl;
+        } else {
+            cout << "Transaction is not passed" << endl;
+        }
     }
 
-    void make_purchase(Bank& bank)
+    void make_purchase(Bank& bank, Company& company)
     {
         llong nominals[9] = {1, 2, 5, 10, 50, 100, 500, 1000, 5000};  
         llong m = money_;
         llong tmp_m = 0;
-        llong current_nominal = 0;
 
         for (int i = 0; i < 9; ++i) {
             if (m < nominals[i] || i == 8) {
@@ -190,7 +223,7 @@ public:
                 while (tmp_m != m) {
                     if (tmp_m + nominals[i] <= m) {
                         // Perform transaction
-                        perform_transaction(bank, i); // to do
+                        perform_transaction(bank, i, company); // to do
                         tmp_m += nominals[i];
                     } else {
                         --i;
@@ -199,14 +232,20 @@ public:
                 break;
             }
         }
-    }
-    
+    } 
 };
+
+
 
 int main()
 {
     Bank bank;
+    Company company;
+    Client client(bank, 340);
+
     bank.show_parametres();
+    
+    client.make_purchase(bank, company);
 
 
 	return 0;
