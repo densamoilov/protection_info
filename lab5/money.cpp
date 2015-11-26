@@ -87,27 +87,27 @@ public:
                 c_[i] = x;
             }
             gcd = 0;
-
+/*
 
 		    if (((c_[i] * d[i]) % fi) != 1) {
 		        cerr << "Invalid numbers d or c" << endl;
 		    }  else {
 		        cout << "All seems to be fine" << endl;
 		    }
+*/
         }
     }
 
     void show_parametres()
     {
         string nominals[9] = {"1", "2", "5", "10", "50", "100", "500", "1000", "5000"};
-
+                cout << "---------------------- Bank info -------------------------------" << endl;
         for (int i = 0; i < nnominals_; ++i) {
-            cout << nominals[i] << " c = " << c_[i] << " d = " << d[i] << endl;
+            cout << nominals[i] << " c = " << c_[i] << ":" << " d = " << d[i] << endl;
         }
 
-        cout << "N = " << N << endl;
-        cout << "p = " << p_ << endl;
-        cout << "q = " << q_ << endl;
+        cout << endl << "N = " << N << " p = " << p_ << " q = " << q_ << endl << endl;
+        cout << "---------------------------------------------------------------" << endl;
     }
 
     // Providing info for bank customer
@@ -128,16 +128,17 @@ public:
 
     bool authentication_request_company(llong n, llong s)
     {
-         
+        cout << "\nRequest company" << endl; 
         hash<llong> hash_cpp;
 
         llong h = hash_cpp(n);
         h %= N;
+        cout << " h = " << h << endl;// " n = " << n << endl;
         
         bool is_equal{false};
-        
+        llong tmp{0};
         for (int i = 0; i < 9; ++i) {
-            llong tmp = pow_module(s, d[i], N);
+            tmp = pow_module(s, d[i], N);
             if (h == tmp) {
                 is_equal = true;
                 break;
@@ -145,8 +146,13 @@ public:
                 is_equal = false;
             }
         }
-
-        return (is_equal) ? true : false;
+        if (is_equal) {
+        	cout << " tmp (" << tmp << ") " << "equal " << h << endl; 
+        	return true;
+        } else {
+     		return false;
+        }
+        //return (is_equal) ? true : false;
     }
 };
 
@@ -176,14 +182,29 @@ public:
 
     void perform_transaction(Bank& bank, llong num_banknote, Company& company)
     {
-        default_random_engine gen(time(0));
-        uniform_int_distribution<llong> random(1, N_ - 1);
 
+    	llong nominals[9] = {1, 2, 5, 10, 50, 100, 500, 1000, 5000};   // for output info
+
+        static default_random_engine gen(time(0));
+        static uniform_int_distribution<llong> random(1, N_ - 1);
+        static set<llong> used_numbers;
         hash<llong> hash_cpp;
-   
-        llong n = random(gen);
+        
+        llong n{0};
+        while (true) {
+            n = random(gen);
+            if (used_numbers.count(n) != 1) {
+            	used_numbers.insert(n);
+                break;
+            }
+        }
+
+
         llong h = hash_cpp(n);
         h %= N_;
+
+        //cout << " n = " << n << " for " << nominals[num_banknote];
+        cout << " h = " << h << " for " << nominals[num_banknote] << endl;
 
         llong gcd{0}, x{0}, y{0}, r{0};
 
@@ -191,9 +212,12 @@ public:
             r = get_prime_number(1, N_ - 1); // replace on simple get_rand_number w/ check for repeat
             generalized_euclid(r, N_, gcd, x, y);
         }
-
         llong hh = (h * (pow_module(r, d_[num_banknote], N_))) % N_;
         llong ss = bank.authentication_request_client(hh, num_banknote);
+
+        cout << " r = " << r << " for " << nominals[num_banknote] << endl;
+        cout << " hh = " << hh << " for " << nominals[num_banknote] << endl;
+        cout << " ss (request_client) = " << ss << " for " << nominals[num_banknote] << endl;
 
         generalized_euclid(r, N_, gcd, x, y);
         if (x < 0) {
@@ -203,11 +227,15 @@ public:
         }
 
         llong s = (ss * r) % N_;
+        cout << " s = " << s << " for " << nominals[num_banknote] << endl;
+
         // to do verify in shop
         if (company.verify_info(n, s, bank)) {
-            cout << "Transaction is passed" << endl;
+            cout << "\nTransaction is passed" << endl;
+            cout << "-------------------------------------------------------------" << endl;
         } else {
-            cout << "Transaction is not passed" << endl;
+            cout << "\nTransaction is not passed" << endl;
+            cout << "-------------------------------------------------------------" << endl;
         }
     }
 
@@ -223,11 +251,13 @@ public:
                 while (tmp_m != m) {
                     if (tmp_m + nominals[i] <= m) {
                         // Perform transaction
+                        cout << "--Perform transaction " << nominals[i] << endl;
                         perform_transaction(bank, i, company); // to do
                         tmp_m += nominals[i];
                     } else {
                         --i;
                     }
+                    cout << endl;
                 }
                 break;
             }
