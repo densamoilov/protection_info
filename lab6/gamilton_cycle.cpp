@@ -54,6 +54,9 @@ public:
 	Item_list_edges(int a, int b, int value = 1)
 	: a_(a), b_(b), value_(value)
 	{}
+	
+	Item_list_edges()
+	{}
 
 	Item_list_edges operator = (const Item_list_edges& rhs)
 	{
@@ -105,7 +108,6 @@ private:
 
     list<Item_list_edges> edges_;
 public:
-	// w/o default constructor
 	Graph(const char* filename)
 	{
 		ifstream input_file(filename);
@@ -135,6 +137,23 @@ public:
 		m_ = m;
 		n_ = n;
 	}
+	
+	Graph()
+	{}
+	
+	Graph operator = (const Graph& rhs)
+	{
+		if (this == &rhs) {
+		    return *this;
+		}
+		
+	    this->m_ = rhs.m_;
+	    this->n_ = rhs.n_;
+	    
+	    this->edges_ = rhs.edges_;
+	    
+	    return *this;
+	}
 
 	list<Item_list_edges> get_list_edges()
 	{
@@ -144,7 +163,7 @@ public:
 	void show_edges()
 	{
 		for (const auto& val : edges_) {
-  		  	cout << "v = " << val.get_first()  << " : " <<  "u = " << val.get_second() << endl;
+  		  	cout << "v = " << val.get_first()  << " : " <<  "u = " << val.get_second() << " value =  " << val.get_value() << endl;
   		}
 	}
 
@@ -173,6 +192,9 @@ private:
 	vector<int> gamilton_cycle_;
 	vector<int> permutation_;
 	vector<int> num_for_concat_;
+	
+	list<Item_list_edges> H_;
+	list<Item_list_edges> F_;
 public:
 	Alice(const char* filename)
 	{
@@ -240,7 +262,7 @@ public:
     
     list<Item_list_edges> get_F(Graph& G) 
     {
-    	list<Item_list_edges> H = G.get_list_edges();
+    	H_ = G.get_list_edges();
 
    		// Generate permutation vector
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -249,7 +271,7 @@ public:
     	shuffle(permutation_.begin(), permutation_.end(), default_random_engine(seed));
 
     	// Perform permutation for list edges
-    	for (auto& x : H) {
+    	for (auto& x : H_) {
     		x.set_first(permutation_[x.get_first() - 1]);
     		x.set_second(permutation_[x.get_second() - 1]);
     	}
@@ -262,7 +284,7 @@ public:
         uniform_int_distribution<llong> random(1000, 50000);
         
         // Concatenate
-        for (auto& x : H) {
+        for (auto& x : H_) {
         	llong r = random(gen);
         	num_for_concat_.push_back(r);
         	llong tmp = x.get_value();
@@ -271,18 +293,18 @@ public:
         }
 
         // Encode H
-        list<Item_list_edges> F = H;
-
-        for (auto& x : F) {
+        F_ = H_;
+        
+        for (auto& x : F_) {
         	llong tmp = x.get_value();
         	tmp = pow_module(tmp, d_, N_);
         	x.set_value(tmp);
         }
 
-        return F;
+        return F_;
     	/*
     	cout << endl;
-    	for (const auto& val : H) {
+    	for (const auto& val : H_) {
   		  	cout << "v = " << val.get_first()  << " : " <<  "u = " << val.get_second() << endl;
   		}
 
@@ -309,6 +331,17 @@ public:
     	}
     	cout << endl;
     }
+    
+    Graph ask_question1()
+    {
+        // Decode gamilton's cycle in graph F
+        //for (auto& val : F) {
+            // d
+    }
+    
+    Graph ask_question2()
+    {}
+    
 
 };
 
@@ -333,7 +366,18 @@ int main(int argc, char** argv)
     Alice alice(argv[1]);
     //alice.show_gamilton_cycle();
     Graph F(alice.get_F(G), G.get_m(), G.get_n());
-
+    cout << "G" << endl;
+    G.show_edges();
+    cout << "F" << endl;
+    F.show_edges();
+    Graph C;
+    C = F;
+    cout << "C" << endl;
+    C.show_edges();
+    
+    //G.show_edges();
+    //F.show_edges();
+ 	
     //alice.show_gamilton_cycle();
     //alice.show_permutation(); 
        
