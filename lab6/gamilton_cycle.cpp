@@ -195,6 +195,9 @@ private:
 	
 	list<Item_list_edges> H_;
 	list<Item_list_edges> F_;
+
+	int m_;
+	int n_;
 public:
 	Alice(const char* filename)
 	{
@@ -220,7 +223,7 @@ public:
 	        c_ = x;
 	    }
 
-	    // Reading Gamilton's cycle
+	    // Reading Hamiltonian cycle
 		ifstream input_file(filename);
 
         if (!input_file.is_open()) {
@@ -228,14 +231,14 @@ public:
    		    exit(1);
    		}
 
-        int m, n, tmp;
+        int tmp;
         char buf[256];
 
-        input_file >> n; // reading number of vertex
-        input_file >> m; // reading number of edges
+        input_file >> n_; // reading number of vertex
+        input_file >> m_; // reading number of edges
 
  		// m + 1 because first time getline reading new line symbol
-	    for (int i = 0; i < m + 1; ++i) {
+	    for (int i = 0; i < m_ + 1; ++i) {
 	    	input_file.getline(buf, 256);
 	    }
 
@@ -245,7 +248,7 @@ public:
 	    input_file.close();
 
 	    // Filling permutation vector
-	    for (int i = 0; i < n; ++i) {
+	    for (int i = 0; i < n_; ++i) {
 	    	permutation_.push_back(i + 1);
 	    }
 	}
@@ -275,7 +278,7 @@ public:
     		x.set_first(permutation_[x.get_first() - 1]);
     		x.set_second(permutation_[x.get_second() - 1]);
     	}
-    	// Perform permutation for gamilton's cycle
+    	// Perform permutation for Hamiltonian cycle
     	for (auto& x : gamilton_cycle_) {
     		x = permutation_[x - 1];
     	}
@@ -294,6 +297,7 @@ public:
 
         // Encode H
         F_ = H_;
+
         
         for (auto& x : F_) {
         	llong tmp = x.get_value();
@@ -308,7 +312,7 @@ public:
   		  	cout << "v = " << val.get_first()  << " : " <<  "u = " << val.get_second() << endl;
   		}
 
-  		cout << "Gamilton's cycle:" << endl;
+  		cout << "Hamiltonian cycle:" << endl;
   		for (const auto& x : gamilton_cycle_) {
   			cout << x << " ";
   		}
@@ -332,15 +336,32 @@ public:
     	cout << endl;
     }
     
+    // What is a Hamiltonian cycle for H
     Graph ask_question1()
     {
-        // Decode gamilton's cycle in graph F
-        //for (auto& val : F) {
-            // d
+        // Decode Hamiltonian cycle in graph F
+        llong first, second;
+
+        for (int i = 0; i < static_cast<int>(gamilton_cycle_.size() - 1); ++i) {
+        	for (auto& val : F_) {
+        		first = val.get_first();
+        		second = val.get_second();
+
+            	if ( (first == gamilton_cycle_[i] && second == gamilton_cycle_[i + 1]) ||
+            	     (second == gamilton_cycle_[i] && first == gamilton_cycle_[i + 1]) ) {
+            		llong tmp = val.get_value();
+            		tmp = pow_module(tmp, c_, N_);
+            		val.set_value(tmp);
+            		break;
+            	}
+        	}
+        }
+        return Graph(F_, m_, n_);
     }
     
     Graph ask_question2()
-    {}
+    {
+    }
     
 
 };
@@ -361,20 +382,24 @@ int main(int argc, char** argv)
     }
 
     Graph G(argv[1]);
-    //G.show_edges();
+    cout << "G" << endl;
+    G.show_edges();
 
     Alice alice(argv[1]);
     //alice.show_gamilton_cycle();
+ 
     Graph F(alice.get_F(G), G.get_m(), G.get_n());
-    cout << "G" << endl;
-    G.show_edges();
+       Graph HH = alice.ask_question2();
+    cout << "HH" << endl;
+    HH.show_edges();
+
     cout << "F" << endl;
     F.show_edges();
-    Graph C;
-    C = F;
-    cout << "C" << endl;
-    C.show_edges();
-    
+    Graph tmp;
+    tmp = alice.ask_question1();
+    cout << "tmp" << endl;
+    tmp.show_edges();
+   
     //G.show_edges();
     //F.show_edges();
  	
